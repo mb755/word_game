@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        #game-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #word {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="game-container">
+        <h1>Word Game</h1>
+        <div id="category"></div>
+        <div id="word"></div>
+        <div id="score">Score: 0</div>
+        <div id="timer">Time: 60</div>
+        <button id="correct">Correct</button>
+        <button id="skip">Skip</button>
+        <button id="restart">Restart</button>
+    </div>
+
+    <script>
+        const words = `
+object,action,person,nature,world,been to,watched
+Toaster,Running,Elon Musk,Dog,Aberdeen,Athens,Baccano!
+Cup,Jumping,the Cowardly Lion,Fish,Buckingham Palace,Bangkok,Neon Genesis Evangelion
+Bowl,Swimming,Dr. Seuss,Hedgehog,Buenos Aires,The Eiffel Tower,Code Geass
+Glass,Climbing,Ebenezer Scrooge,Rabbit,Bethlehem,The Grand Canyon,Friends
+Curtains,Dancing,Bugs Bunny,Snake,Corsica,Los Angeles,Big Bang Theory
+Pictures,Singing,James Bond,Turtle,The leaning tower of Pisa,New York,Dune
+CD,Writing,Amelia Earhart,Duck,The Empire State Building,Oxford University,Wednesday
+Knife,Reading,Andy Warhol,Tuna,Hollywood,Pearl Harbour,Tower of God
+Shoes,Painting,Jimmy Stewart,Bear,Istanbul,Rome,Blue Eye Samurai
+Towel,Drawing,John Hancock,panda,Mount Everest,Stockholm,Umbrella Academy
+Paper,Cooking,Dennis the Menace,Gorilla,The Kremlin,Versailles,My next life as a Villainess
+Pencil,Baking,Dumbledore,Camel,Mecca,Wall Street,How heavy are the dumbbells you lift
+Vacuum Cleaner,Driving,Eleanor Roosevelt,Giraffe,Bogota,Paris,Jetlag the game
+Dishwasher,Flying,Sirius Black,Dinosaurs,The amazon river,Venice,Vinland saga
+Ironing board,Shopping,Sean Connery,Apricot,Mount Blanc,Edinburgh,Shangri-la frontier
+Food,Walking,Dracula,Avocado,The Great Pyramids,Malta,Frieren
+Plant,Biking,Shakespeare,Cherry,Rio-de-Janerio,Munich,Isle of Dogs
+DVD player,Skating,Bruce Willis,Cranberry,Camp Nou,The Alhambra,Raya and the last Dragon
+Jewellery,Skiing,James Earl Jones,Grape,Santiago Bernabeu,The London Eye,Guardians of the Galaxy
+Jacket,Surfing,Buzz Lightyear,Kiwi fruit,Indonesia,Times Square,Elemental
+Socks,Diving,Spider Man,Lime,The South Pole,Amsterdam,Heavenly delusion
+Belt,Fishing,Albert Einstein,Melon,Baghdad,Bastille,Turning Red
+Boots,Gardening,Inigo Montoya,Olive,Calais,Big Ben,Scott Pilgrin vs the world
+Bottle of wine,Sewing,Denzel Washington,Peach,Chicago,No. 10. Downing Street,Zom 100
+Photocopier,Knitting,Barbie,Pear,Stonehenge,Jerusalem,Barbie (movie)
+Presents,Cleaning,Sherlock Holmes,Raspberry,Great Wall of China,Tokyo,Attack on Titan
+Computer mouse,Washing,Brad Pitt,Potato,Gibraltar,The Louvre museum,La la land
+Violin,Ironing,Scooby Doo,Broccoli,Havana,The Coliseum,Spiderman into the spiderverse
+Car,Mopping,E.T.,Onion,Houston,The Vatican,Mashle
+Blu-tack,Sweeping,Indiana Jones,Mushroom,Mount Kilimanjaro,The World Trade Centre,Super mario bros (movie)
+spoon,Shaving,Henry Ford,Asparagus,The Pentagon,Dublin,Puss in Boots
+fork,Brushing,Cap'n Crunch,Pumpkin,Caracas,Berlin,Mob psycho 100
+clock,Smiling,Dora the Explorer,cat,Monte Carlo,The Sydney Opera House,Soul (movie)
+cushions,Laughing,Abraham Lincoln,rat,New Orleans,Seville,Spy X Family
+book,Crying,Elvis Presley,mouse,Harvard University,Cordoba,Avatar (movie)
+Clothes,Sleeping,Stephanie Meyer,spider,The Sphinx,The Statue of Liberty,Avatar: the last airbender
+soap,Dreaming,Lance Armstrong,snail,Red Square,Kyoto,How to train your dragon
+mirror,Snoring,Leonardo Da Vinci,crocodile,Pompeii,Osaka,Dr Strange
+pen,Yawning,C-3P0,lion,Warsaw,Hiroshima,Everything everywhere all at once
+light,Stretching,Celine Dion,tiger,Graceland,Nagasaki,Stranger things
+Washing Machine,Exercising,Mahatma Gandhi,zebra,Moscow,Sapporo,Everybody's talking about Jamie
+Iron,Meditating,Justin Beiber,leopard,Sicily,Hokkaido,French dispatch
+toilet paper,Practicing,Anakin Skywalker,elephant,Greenland,Barcelona,Onward (movie)
+drink,Teaching,Eli Whitney,horse,The North Pole,Mount Fuji,Dorohedoro
+TV,Learning,Audrey Hepburn,hippo,Liverpool,Dead Sea,Devilman crybaby
+boxes,Studying,Isaac Newton,butterfly,Niagara Falls,Acropolis,Ranking of Kings
+computer,Speaking,Robin Hood,Apple,Sahara Desert,Parthenon,Encanto
+Trousers,Listening,Rocky,Banana,Taj Mahal,Great Barrier Reef,HAI crimespree
+Underwear,Whispering,Frankenstein,Coconut,Galápagos Islands,Sydney Harbour Bridge,Komi-san can't communicate
+t-shirt,Shouting,Beethoven,Cucumber,Machu Picchu,Tower of London,No time to die
+Football boots,Talking,Pocahontas,Grapefruit,Mount Rushmore,Brooklyn Bridge,Don't look up
+Printer,Arguing,Kevin Bacon,Lemon,Blue Lagoon,Berlin Wall,Arcane
+Christmas tree,Debating,John Williams,Mango,Matterhorn,Western Wall,The green knight
+Flowers,Explaining,Louis Armstrong,Watermelon,Rocky Mountains,Grand Canal,AlphaGo (movie)
+Guitar,Discussing,Hannah Montana,Orange,Amazon Rainforest,Tower Bridge,Muppets Christmas Carol
+Bicycle,Planning,David Beckham,Pepper,Serengeti,The Shard,V for vendetta
+Stapler,Organizing,Helen Keller,Pineapple,Burj Khalifa,London Underground,Suicide squad
+Video game,Traveling,Lucille Ball,Strawberry,River Nile,Hoover Dam,In the heights
+Lava lamp,Exploring,Sacajawea,Carrot,Golden Gate Bridge,Louvre Pyramid,Keep your hands off Eizouken
+Rubik's cube,Camping,Benjamin Franklin,Tomato,CN Tower,Arc de Triomphe,Black Widow (movie)
+Ukulele,Hunting,Captain Kirk,Garlic,Pyramids of Giza,Brandenburg Gate,Free guy
+Lego,Chasing,Billy the Kid,Pea,White House,Petronas Towers,Odd taxi
+Typewriter,Hiding,Franklin D. Roosevelt,Cauliflower,Great Mosque of Mecca,Kegon falls,Anohana
+Kaleidoscope,Searching,Mario,Iceberg Lettuce,Forbidden City,Yosemite National Park,Beastars
+Snow globe,Finding,Han Solo,Aardvark,Terracotta Army,Redwood National Park,Bladerunner
+Abacus,Catching,Mark Twain,Acacia,Kremlin,Death Valley,Titan AE
+Dreamcatcher,Throwing,C. S. Lewis,Adder,Sistine Chapel,Thames,Horimiya
+Hourglass,Kicking,Salvador Dali,Albatross,Pantheon,Danube,The devil is a part timer
+Telescope,Passing,Captain Hook,Alligator,Andes,Wadi Rum Desert,Invincible
+Harmonica,Dribbling,Rapunzel,Alpaca,Himalayas,Mojave Desert,Yurukamp
+Boomerang,Shooting,Charles Dickens,Anaconda,Carpathian Mountains,Isle of Skye,The iron giant
+Tamagotchi,Scoring,Luke Skywalker,Anteater,Black Forest,Las Vegas,Intouchable
+Sundial,Cheering,Harry Houdini,Antelope,Hollywood Sign,Santa Barbara,Weathering with you
+Pinwheel,Clapping,Santa Claus,Armadillo,Christ the Redeemer,Monterey,John Wick
+Bamboo steamer,Waving,Harrison Ford,Artichoke,Space Needle,New York Public Library,The hunt for the wilderpeople
+Bonsai tree,Hugging,Batman,Baboon,Opera House in Vienna,Tenerife,Re-zero
+Microscope,Kissing,George Lucas,Badger,Blue Mosque,Llandudno,Klaus (movie)
+Compass,Blowing,Darth Vader,Bamboo,Hagia Sophia,Teide national park,Konosuba
+Binoculars,Winking,Mufasa,Basil,Colossus of Rhodes,Snowdon,Castlevania
+Slinky,Nodding,Oprah Winfrey,Bat,Moai Statues of Easter Island,Ben Nevis,Snow white with the red hair
+Xylophone,Shaking,Garfield,Beet,Nazca Lines,Glasgow airport,Little women
+Theremin,Frowning,Genghis Khan,Beetle,Everglades,Barra,Jojo Rabbit
+Ouija board,Grinning,Gilligan,Beluga,Great Salt Lake,Castlebay,Parasite
+Cauldron,Joking,Michael Phelps,Bison,Caspian Sea,Isle of Harris,Oldboy
+Metronome,Pranking,Michelangelo,Blackberry,Baltic Sea,Stornoway,The departed
+Mortar and pestle,Mimicking,Charles Darwin,Blueberry,English Channel,Hebrides,Howl's moving castle
+Gong,Skipping,Bill Gates,Boa,Bosphorus,Uig,Spirited away
+Terrarium,Hopping,Walt Disney,Buffalo,Panama Canal,Fairy Glen,Princess Kaguya
+Incense burner,Sliding,Harry Potter,Bullfrog,Suez Canal,Loch Ness,The cat returns
+Phonograph,Swinging,Marty McFly,Bumblebee,Seine River,Loch Lomond,Pom poko
+Hula hoop,Balancing,Hamlet,Cactus,Rhine River,Helvellyn,The wind rises
+Wind chimes,Spinning,Mother Teresa,Canary,Volga River,Time out market,Marvellous mrs Maisel
+Kite,Twisting,Cleopatra,Capybara,Mekong River,Lisbon,Once upon a time in Hollywood
+Cuckoo clock,Bouncing,Mr. Darcy,Cassowary,Ganges River,Sintra,Frozen
+Bagpipes,Rolling,Clark Kent,Caterpillar,Yangtze River,Andorra,3 chone no yuuhi
+Hammock,Lifting,Grace Kelly,Centipede,Sinai Peninsula,Grazalema,One punch man
+Hoverboard,Pushing,Thomas Edison,Chameleon,Faroe Islands,Zahara de la Sierra,Violet Evergarden
+Quill (pen),Pulling,Tony Hawk,Cheetah,Azores,Cadiz,Shoplifters
+Sextant,Carrying,Neil Armstrong,Chicory,Mercury,Toulouse,Annihilation
+Nutcracker,Dragging,Bill Cosby,Chimpanzee,Venus,Marseille,Wreck it Ralph
+Monocle,Bending,George Washington,Chinchilla,Uranus,Milan,Rascal does not dream of bunny gitl senpai
+Calligraphy set,Folding,Cinderella,Chipmunk,Neptune,Florence,Trigun
+Pinhole camera,Flipping,Willy Wonka,Chrysanthemum,Mars,Cinque Terre,Sailor Moon
+Tesla coil,Leaping,Mary Poppins,Cicada,Saturn,Lausanne,Durarara
+Egg timer,Sprinting,Peter Pan,Clownfish,Jupiter,Geneva,Fullmetal Alchemist
+Fountain pen,Vaulting,Frodo,Cobra,Tirana,Montreux,Fullmetal Panic
+Grandfather clock,Hurdling,Neil Diamond,Cockroach,Sarajevo,Lac Leman,Gintama
+Loom,Gliding,George of the Jungle,Condor,Algeria,Neuschwanstein castle,A silent voice
+Magnifying glass,Skimming,Mr. Rogers,Coral,Libya,Chiemsee,Your name
+Ocarina,Floating,Pablo Piccaso,Coyote,Egypt,Salzburg,Cowboy bebop
+Pendulum,Submerging,Voldermort,Crab,Cairo,Vienna,One Piece
+Quiver,Paddling,Winnie the Pooh,Crane,Morocco,Cesky Krumlov,Princess Mononoke
+Thimble,Rowing,Christopher Columbus,Cricket,Marrakesh,Prague,Jojo's bizarre adventure
+Unicycle,Sailing,Martin Luther King,Crow,Tangier,Hamburg,Samurai champloo
+Bellows,Cruising,Winston Churchill,Cypress,Antarctica,Hague,Space brothers
+Chalkboard,Drifting,Muhammad Ali,Daffodil,Nigeria,Malmo,Pluto
+Decanter,Anchoring,Margaret Thatcher,Dandelion,Ethiopia,Copenhagen,The Shawshank Redemption
+Easel,Docking,Plato,Deer,Madagascar,CopenHill,The Godfather
+Fabergé egg,Boarding,Queen Victoria,Dingo,Zanzibar,Oslo,The Dark Knight
+Juggling balls,Landing,Louis Pasteur,Dolphin,Mariana trench,Bergen,12 Angry Men
+Lantern,Parachuting,Pablo Picasso,Donkey,Falkland Islands,Ulriken,Schindler's List
+Nunchaku,Soaring,Pope John Paul II,Dove,Uruguay,Southend,The Lord of the Rings
+Oboe,Ascending,Ludwig Beethoven,Dragonfly,Lima,Bray,Pulp Fiction
+Prism,Descending,Eva Peron,Durian,Peru,Ely,"The Good, the bad and the ugly"
+Rocking horse,Hiking,Dalai Lama,Eagle,Oslo,St Ives,Fight Club
+Tambourine,Trekking,Malcolm X,Earthworm,Stockholm,Stoke-on-trent,Forrest Gump
+Umbrella stand,Mountaineering,Richard Branson,Eel,Helsinki,Fort William,Star Wars
+Vase,Rappelling,Ernest Hemingway,Elk,Copenhagen,Inverness,Inception
+Watering can,Scrambling,Michael Jordon,Emu,Reykjavik,Invergarry,One Flew Over the Cuckoo's Nest
+Birdcage,Navigating,V.Lenin,Eucalyptus,Dublin,Fort Augustus,Goodfellas
+Fannypack,Piloting,Fidel Castro,Falcon,Edinburgh,Ljubljana,The Matrix
+Kimono,Glancing,Coco Chanel,Fern,Glasgow,Valetta,Se7en
+Parasol,Gazing,Adolf Hitler,Ferret,Amsterdam,Tel Aviv,The Silence of the Lambs
+Stethoscope,Peeking,Mary Magdalene,Firefly,Brussels,Ein Gedi,It's a Wonderful Life
+Tuning fork,Staring,Michael Jackson,Flamingo,Luxembourg,Jordan,The Usual Suspects
+Vespa (scooter),Squinting,Mata Hari,Flea,Zurich,Petra,Saving Private Ryan
+Whetstone,Blinking,Ronald Reagan,Fox,Geneva,Aqaba,Leon
+Yurt,Peering,Leon Trotsky,Frog,Bern,Hanoi,The Green Mile
+Zamboni,Swaying,Sigmund Freud,Gazelle,Vienna,Hue,Interstellar
+Lyre,Marching,Tiger Woods,Gecko,Salzburg,Ho Chi Minh City,City Lights
+Maracas,Parading,Prince Charles,Ginger,Munich,Koh Lanta,Once upon a time in the West
+Rocking chair,Galloping,Tom Cruise,Ginkgo,Berlin,Penang,Casablanca
+Sitar,Trotting,Anne Frank,Goat,Frankfurt,Kuala Lumpur,Modern Times
+Bow,Cantering,John F. Kennedy,Goose,Hamburg,Marina Bay Sands,The Pianist
+Kalimba,Skidding,Nelson Mandela,Grasshopper,Cologne,Singapore,The Incredibles
+Lute,Stomping,Charles de Gaulle,Guava,Prague,Cairns,Terminator
+Mandolin,Tiptoeing,George Orwell,Gull,Budapest,Temple of the Emerald Buddha,Back to the Future
+Shamisen,Crawling,Paul McCartney,Hamster,Bratislava,Tongariro,Whiplash
+Accordion,Crouching,Queen Elizabeth II,Hare,Ljubljana,Milford Sound,Indiana Jones
+Chimes,Squatting,Leo Tolstoy,Hawk,Zagreb,Picton,The Lion King
+Piccolo,Ducking,Vincent Van Gogh,Hibiscus,Belgrade,Shimanami kaido,Gladiator
+Recorder,Dodging,Desmond Tutu,Hummingbird,Sofia,Odaiba,The Prestige
+Trombone,Evading,Barack Obama,Hyena,Bucharest,Okayama,Memento
+Washboard,Fleeing,J.K.Rowling,Ibis,Kiev,Sendai,Alien
+Banjo,Outrunning,Pele,Iguana,Minsk,Matsuyama,The legend of 1900
+Clarinet,Darting,John Lennon,Impala,Vilnius,Tokushima,Avengers
+Pan flute,Weaving,Joseph Stalin,Iris,Tallinn,Kagoshima,Dr. Strangelove
+Viola,Zigzagging,George W Bush,Jackal,Thessaloniki,Sakurajima,The Shining
+Cello,Meandering,Osama Bin Laden,Jaguar,Crete,Sado island,Django Unchained
+Fiddle,Circling,Oscar Wilde,Jellyfish,Santorini,Niigata,WALL·E
+Bongos (drums),Orbiting,Pope Francis,Juniper,Rhodes,Kanazawa,Coco
+Taiko drum,Sprawling,Sting,Kangaroo,Cyprus,Toyama,Citizen Kane
+Gramophone,Shrugging,Alfred Hitchcock,Koala,Jaffa,Kurobe dam,Braveheart
+Pocket watch,Gesturing,Madonna,Koi,Damascus,Kamakura,Vertigo
+Music box,Pointing,Roger Federer,Komodo dragon,Dubai,Hirosaki,North by Northwest
+Globe,Beckoning,Mao Zedong,Krill,Abu Dhabi,Noboribetsu Onsen,Reservoir Dogs
+Gyroscope,High-fiving,Usain Bolt,Kumquat,Doha,Koya san,Amadeus
+Barometer,Fist-bumping,J.R.R. Tolkien,Ladybug,Tehran,Itsukushima shrine,Requiem for a Dream
+Thermometer,Saluting,Simon Bolivar,Lemming,Delhi,Fushimi inari shrine,2001: A Space Odyssey
+Seismograph,Nuzzling,Antonio Banderas,Lemur,Mumbai,Onomichi,Amélie
+Fossil,Snuggling,Napoléon Bonaparte,Lichen,Kolkata,Umeda sky building,Toy Story
+Meteorite,Cuddling,Henry VIII,Lily,Kathmandu,Himeji,Inglourious Basterds
+Spyglass,Petting,Benito Mussolini,Llama,Bhutan,Yamadera,Good Will Hunting
+Wind chime,Scratching,Steve Jobs,Lobster,Jakarta,Varosliget,Snatch
+Matryoshka doll,Grooming,Elizabeth I,Locust,Bali,Margitsziget,Scarface
+Origami crane,Tending,Elizabeth II,Lotus,Manila,Sopron,Monty Python and the Holy Grail
+Chessboard,Feeding,Galileo Galilei,Lychee,Busan,Tata,Up
+Jigsaw puzzle,Watering,Dwight D. Eisenhower,Lynx,Melbourne,Szeged,Die Hard
+Spinning top,Harvesting,Donald Trump,Macadamia,Brisbane,Queenstown,My neighbor Totoro
+Magic 8 Ball,Pruning,Oliver Cromwell,Magnolia,Perth,Christchurch,A Beautiful Mind
+Wind-up toy,Trimming,Eminem,Manatee,Canberra,Auckland,"Lock, Stock and Two Smoking Barrels"
+Pocket knife,Weeding,Kim Jong-un,Mantis,Fiji,Wellington,Inside Out
+Slide rule,Hoeing,Cristiano Ronaldo,Maple,Maldives,Rotorua,The Wolf of Wall Street
+Stamp collection,Tilling,Saddam Hussein,Marigold,Seychelles,British Museum,Trainspotting
+Coin collection,Raking,Richard Nixon,Meerkat,Mauritius,TeamLab: Planets,The Sixth Sense
+Periscope,Composting,Princess Diana,Millipede,Cape Town,Tsukiji fish market,Gone with the Wind
+Vinyl record,Mixing,Homer Simpson,Mink,Johannesburg,Borough market,The Thing
+Cassette tape,Stirring,Julius Caesar,Mockingbird,Pretoria,Yorkshire dales,Fargo
+Floppy disk,Whisking,Ferdinand Magellan,Mongoose,Casablanca,Peak District,Finding Nemo
+CD-ROM,Chopping,Taylor Swift,Moose,Tunis,Lake district,The Big Lebowski
+VHS tape,Dicing,William Shakespeare,Mosquito,Algiers,Cotswolds,Shutter Island
+Film reel,Slicing,Vladimir Lenin,Moth,Alexandria,Mediterranean sea,Kill Bill
+Slide projector,Grating,Bruce Lee,Mule,Luxor,Vltava (river),Gone Girl
+Fortune cookie,Peeling,Suleiman,Narwhal,Macau,Chillon castle,Jurassic Park
+Magic wand,Boiling,Al Capone,Newt,Nepal,Siem Reap,Life of Brian
+Tarot cards,Simmering,Rihanna,Nightingale,Tibet,Angkor Wat,The Truman Show
+Inkwell,Frying,Louis XVI,Ocelot,Tiananmen Square,Seoul,The Grand Budapest Hotel
+Harp,Grilling,Kurt Cobain,Octopus,Shanghai,Sydney,Stalker
+,Roasting,Martin Luther King Jr.,Okra,Shenzhen,Hong Kong,Ben-Hur
+Megaphone,Toasting,George Harrison,Opossum,Taipei,St Peter's Basilica,12 Years a Slave
+Microphone,Searing,Joan of Arc,Orangutan,Okinawa,Schonbrunn Palace,Million Dollar Baby
+Headphones,Sautéing,Charlie Chaplin,Orchid,Galapagos islands,Alhambra,Mad Max: Fury Road
+Projector,Steaming,Alexander Graham Bell,Ostrich,Utah,Tate modern,X-men
+Camera,Poaching,Michael Jordan,Otter,Caucasus Mountains,Musée d'Orsay,The Princess Bride
+Drone,Braising,Clint Eastwood,Owl,Alaska,National Portrait gallery,Catch Me If You Can
+Robot,Marinating,Dolly the Sheep,Oyster,Lapland,El Capitan,Rocky
+Calculator,Plating,Robert Downey Jr,Papaya,Svalbard,Ha long bay,"Monsters, Inc."
+Smartphone,Seasoning,Joe Biden,Parakeet,Uluru,Cliffs of Moher,Dead Poets Society
+Tablet,Garnishing,James Cook,Parrot,Alice Springs,Giant's causeway,Donnie Darko
+Flashlight,Devouring,Vladimir Putin,Parsnip,Phi phi island,Arashiyama Bamboo Grove,Groundhog Day
+Candle,Nibbling,Ariana Grande,Partridge,Kansas,O'ahu,Jaws
+Rocket,Chewing,Shakira,Peacock,Kentucky,Hawaii,The Help
+Spacesuit,Sipping,Kobe Bryant,Pelican,Montana,Sequoia National Park,Pirates of the Caribbean
+Submarine,Slurping,Thomas Jefferson,Penguin,Illinois,Bridge of Sighs,Breaking bad
+Hovercraft,Gulping,Johnny Depp,Persimmon,The Great Lakes,Ho Chi Minh's mausoleum,Rick and Morty
+Hot Air Balloon,Swallowing,Arnold Schwarzenegger,Pheasant,Lake Baikal,Hue International Airport,Sherlock
+Frisbee,Tasting,Jim Carrey,Pigeon,Lake Biwa,Hobbiton,Firefly
+Parchment,Smelling,Leonardo DiCaprio,Pike,Quebec,Kyoto tower,Serenity
+Scroll,Savoring,Emma Watson,Platypus,Montenegro,Shizuoka,Taskmaster
+Map,Sniffing,Daniel Radcliffe,Plum,,Montmartre,Last Week Tonight
+Blueprint,Snorting,Chris Evans,Porcupine,,Immovable ladder,Black Mirror
+GPS,Sneezing,Charles Chaplin,Porpoise,,Tokyo stock exchange,Futurama
+Anvil,Coughing,Morgan Freeman,Possum,,Shibuya scramble,Battlestar Galactica
+Hammer,Hiccuping,Tom Hanks,Praying mantis,,Meiji Jingu,House (MD)
+Chisel,Burping,Hugh Jackman,Puffin,,Ronda bridge,The Simpsons
+Screwdriver,Gasping,Matt Damon,Quail,,Tower of Belem,Arrested Development
+Wrench,Panting,Sylvester Stalone,Quince,,A-bomb dome,Star Trek
+Pliers,Breathing,Will Smith,Raccoon,,Harajuku,Naruto
+Shovel,Inhaling,Cameron Diaz,Radish,,Kiyomizu-dera,Gilmore Girls
+Wheelbarrow,Exhaling,George Clooney,Raven,,Nara park,House of Cards
+Plow,Sweating,Steven Spielberg,Reindeer,,Studio Ghibli museum,Parks and Recreation
+Windmill,Perspiring,Robert De Niro,Rhino,,Newcastle,30 Rock
+Crochet hook,Blushing,Al Pacino,Robin,,Arthur's seat,The X-files
+Sewing Machine,Trembling,Russel Crowe,Rockfish,,Glenfinnan viaduct,Daredevil
+Knitting Needles,Shivering,Liam Neeson,Rose,,Kek Lok Si temple,Poirot
+Paintbrush,Quaking,Mark Wahlberg,Rosemary,,Bondi beach,Tenet
+Palette,Vibrating,Natalie Portman,Sage,,Franz Josef glacier,Archer
+Sculpture,Twitching,Pierce Brosnan,Salamander,,Tokyo Skytree,QI
+Pottery Wheel,Flinching,Sean Connery,Salmon,,Takayama,Doctor Who
+Kiln,Grimacing,Orlando Bloom,Scorpion,,St Michael's Mount,Your Lie in April
+Soldering Iron,Scowling,Dwayne Johnson,Seagull,,Penzance,Veritasium
+Circuit Board,Grumbling,Jackie Chan,Seahorse,,Grenoble airport,Abroad in Japan
+Transistor,Muttering,Angelina Jolie,Seal,,Oslo opera house,Half as Interesting
+Vacuum Tube,Mumbling,Adam Sandler,Shark,,Benbulben,Lateral
+Battery,Groaning,Scarlett Johansson,Sheep,,Belfast,
+Dynamo,Moaning,Anne Hathaway,Shrimp,,Los Angeles,
+Turbine,Whining,Edward Norton,Skunk,,Pasadena,
+Generator,Complaining,Keira Knightley,Sloth,,Mosta Rotunda,
+Solar Panel,Griping,Julia Roberts,Slug,,Mount Hakodate,
+Wind Turbine,Chuckling,Nicolas Cage,Sparrow,,Nevada,
+Steam Engine,Giggling,Daniel Craig,Squid,,California,
+Internal Combustion Engine,Snickering,Keanu Reeves,Squirrel,,Hachinohe,
+Electric Motor,Howling,Ian McKellen,Starfish,,Greenwich,
+Magnet,Roaring,Halle Berry,Stingray,,Cutty Sark,
+Crystal,Growling,Bruce Willis,Stork,,,
+,Snarling,Samuel L Jackson,Sunflower,,,
+,Screaming,Mel Gibson,Swan,,,
+,Wailing,Vin Diesel,Swordfish,,,
+,Humming,Robin Williams,Tamarind,,,
+,Chanting,Kevin Spacey,Tapir,,,
+,Crooning,Jean-Claude Van Damme,Tarantula,,,
+,Whistling,Christian Bale,Termite,,,
+,Yodeling,Sandra Bullock,Thistle,,,
+,Rapping,Macaulay Culkin,Toad,,,
+,Beatboxing,Jack Nicholson,Toucan,,,
+,Strumming,Bill Murray,Trout,,,
+,Plucking,Jake Gylenhaal,Tulip,,,
+,Drumming,Jason Statham,Turnip,,,
+,Tapping,Rowan Atkinson,Urchin,,,
+,Snapping,John Travolta,Vanilla,,,
+,Clicking,Frank Sinatra,Viper,,,
+,Clanging,Ben Affleck,Vulture,,,
+,Banging,Jennifer Aniston,Wallaby,,,
+,Thumping,Emma Stone,Walrus,,,
+,Pounding,Chris Hemsworth,Warthog,,,
+,Beating,James McAvoy,Wasp,,,
+,Slamming,James Cameron,Watercress,,,
+,Smashing,Tom Hiddleston,Weasel,,,
+,Bashing,Chris Pratt,Whale,,,
+,Crashing,Daisy Ridley,Wildebeest,,,
+,Colliding,Ryan Gosling,Wolf,,,
+,Bumping,,Wolverine,,,
+,Knocking,,Wombat,,,
+,Scraping,,Woodpecker,,,
+,Scrubbing,,Wren,,,
+,Polishing,,Yak,,,
+,Buffing,,Zucchini,,,
+,Sharpening,,Anemone,,,
+,Sanding,,Jackfruit,,,
+,Filing,,Okapi,,,
+,Chiseling,,Yam,,,
+,Carving,,,,,
+,Molding,,,,,
+,Sculpting,,,,,
+,Designing,,,,,
+,Drafting,,,,,
+,Sketching,,,,,
+,Doodling,,,,,
+,Coloring,,,,,
+,Inking,,,,,
+,Shading,,,,,
+,Framing,,,,,
+,Mounting,,,,,
+,Displaying,,,,,
+,Admiring,,,,,
+,Critiquing,,,,,
+,Judging,,,,,
+,Competing,,,,,
+,Racing,,,,,
+,Jogging,,,,,
+,Completing,,,,,
+,Finishing,,,,,
+,Winning,,,,,
+,Losing,,,,,
+,Celebrating,,,,,
+,Congratulating,,,,,
+,Encouraging,,,,,
+,Motivating,,,,,
+,Inspiring,,,,,
+,Leading,,,,,
+,Guiding,,,,,
+,Coaching,,,,,
+,Mentoring,,,,,
+,Advising,,,,,
+,Counseling,,,,,
+,Mediating,,,,,
+,Consulting,,,,,
+,Supporting,,,,,
+,Assisting,,,,,
+,Helping,,,,,
+,Volunteering,,,,,
+,Donating,,,,,
+,Giving,,,,,
+,Receiving,,,,,
+,Sharing,,,,,
+,Borrowing,,,,,
+,Lending,,,,,
+,Trading,,,,,
+,Swapping,,,,,
+,Bargaining,,,,,
+,Haggling,,,,,
+,Negotiating,,,,,
+,Bartering,,,,,
+,Contracting,,,,,
+,Signing,,,,,
+,Endorsing,,,,,
+,Approving,,,,,
+,Declining,,,,,
+,Refusing,,,,,
+,Rejecting,,,,,
+,Ignoring,,,,,
+,Avoiding,,,,,
+,Escaping,,,,,
+,Sidestepping,,,,,
+,Backtracking,,,,,
+,Reversing,,,,,
+,Retreating,,,,,
+,Advancing,,,,,
+,Approaching,,,,,
+,Progressing,,,,,
+,Developing,,,,,
+,Innovating,,,,,
+,Inventing,,,,,
+,Creating,,,,,
+,Crafting,,,,,
+,Building,,,,,
+,Assembling,,,,,
+,Constructing,,,,,
+,Erecting,,,,,
+,Demolishing,,,,,
+,Destroying,,,,,
+,Breaking,,,,,
+,Shattering,,,,,
+,Splitting,,,,,
+,Cracking,,,,,
+,Fracturing,,,,,
+,Tearing,,,,,
+,Ripping,,,,,
+,Cutting,,,,,
+,Sawing,,,,,
+,Shearing,,,,,
+,Clipping,,,,,
+,Snipping,,,,,
+`;
+
+        let categories = [];
+        let currentCategory = '';
+        let currentWord = '';
+        let score = 0;
+        let timeLeft = 60;
+        let timer;
+
+        const wordEl = document.getElementById('word');
+        const categoryEl = document.getElementById('category');
+        const scoreEl = document.getElementById('score');
+        const timerEl = document.getElementById('timer');
+        const correctBtn = document.getElementById('correct');
+        const skipBtn = document.getElementById('skip');
+        const restartBtn = document.getElementById('restart');
+
+        function parseCSV(csv) {
+            const lines = csv.trim().split('\n');
+            const headers = lines[0].split(',');
+            categories = headers;
+
+            const wordsByCategory = {};
+            categories.forEach(category => wordsByCategory[category] = []);
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',');
+                categories.forEach((category, index) => {
+                    if (values[index]) {
+                        wordsByCategory[category].push(values[index]);
+                    }
+                });
+            }
+
+            return wordsByCategory;
+        }
+
+        const wordsByCategory = parseCSV(words);
+
+        function chooseCategory() {
+            const allCategories = [...categories, 'random'];
+            currentCategory = allCategories[Math.floor(Math.random() * allCategories.length)];
+            categoryEl.textContent = `Category: ${currentCategory}`;
+        }
+
+        function chooseWord() {
+            if (currentCategory === 'random') {
+                const allWords = categories.flatMap(category => wordsByCategory[category]);
+                currentWord = allWords[Math.floor(Math.random() * allWords.length)];
+            } else {
+                const categoryWords = wordsByCategory[currentCategory];
+                currentWord = categoryWords[Math.floor(Math.random() * categoryWords.length)];
+            }
+            wordEl.textContent = currentWord;
+        }
+
+        function updateScore() {
+            score++;
+            scoreEl.textContent = `Score: ${score}`;
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            timerEl.textContent = `Time: ${timeLeft}`;
+            if (timeLeft === 0) {
+                endGame();
+            }
+        }
+
+        function startGame() {
+            chooseCategory();
+            chooseWord();
+            score = 0;
+            scoreEl.textContent = `Score: ${score}`;
+            timeLeft = 60;
+            timerEl.textContent = `Time: ${timeLeft}`;
+            timer = setInterval(updateTimer, 1000);
+            correctBtn.disabled = false;
+            skipBtn.disabled = false;
+        }
+
+        function endGame() {
+            clearInterval(timer);
+            wordEl.textContent = `Game Over! Final Score: ${score}`;
+            correctBtn.disabled = true;
+            skipBtn.disabled = true;
+        }
+
+        correctBtn.addEventListener('click', () => {
+            updateScore();
+            chooseWord();
+        });
+
+        skipBtn.addEventListener('click', () => {
+            chooseWord();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            clearInterval(timer);
+            startGame();
+        });
+
+        startGame();
+    </script>
+</body>
+
+</html>
