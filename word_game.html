@@ -18,10 +18,21 @@
 
         #game-container {
             background-color: white;
-            padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            height: 40vh;
+            width: 80vw;
+            max-width: 600px;
+        }
+
+        #game-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         button {
@@ -41,10 +52,30 @@
             display: flex;
             justify-content: space-around;
             margin-top: 20px;
+            height: 200px;
+            /* Fixed height */
+            overflow-y: auto;
+            /* Make it scrollable */
         }
 
         .tracker-column {
             flex: 1;
+            overflow-y: auto;
+            /* Make each column independently scrollable */
+        }
+
+        .tracker-column h3 {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            margin: 0;
+            padding: 10px 0;
+        }
+
+        .tracker-column ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
         }
     </style>
 </head>
@@ -52,13 +83,17 @@
 <body>
     <div id="game-container">
         <h1>Word Game</h1>
-        <div id="category"></div>
-        <div id="word"></div>
-        <div id="score">Score: 0</div>
-        <div id="timer">Time: 60</div>
-        <button id="correct">Correct</button>
-        <button id="skip">Skip</button>
-        <button id="restart">Restart</button>
+        <div id="game-area">
+            <div id="category"></div>
+            <div id="word"></div>
+            <div id="score">Score: 0</div>
+            <div id="timer">Time: 60</div>
+            <div>
+                <button id="correct">Correct</button>
+                <button id="skip">Skip</button>
+                <button id="restart">Restart</button>
+            </div>
+        </div>
         <div id="tracker">
             <div class="tracker-column">
                 <h3>Correct</h3>
